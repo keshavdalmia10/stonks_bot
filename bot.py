@@ -73,7 +73,7 @@ async def get_list(ctx):
 @bot.command(name='stock', help='Enter the name of the company')
 async def stock(ctx,stock_name):
     msft = yf.Ticker(stock_name)
-    embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="Risk hai toh Ishq hai", color=0xFF5733)
+    embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="For now just description", color=0xFF5733)
     embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
     embed.set_thumbnail(url=msft.info['logo_url'])
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
