@@ -86,13 +86,19 @@ async def stock(ctx,stock_name):
     stock_name=stock_name+".NS"
     msft = yf.Ticker(stock_name)
     embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="For now just description", color=0xFF5733)
-    embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
+    embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
     embed.set_thumbnail(url=msft.info['logo_url'])
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
     embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed.set_footer(text="Phone no: {}".format(msft.info['phone']))
+    button=Button(label="Click me!", style=discord.ButtonStyle.green)
+
+    view=View()
     
-    await ctx.send(embed=embed)
+    view.add_item(button)
+    
+    
+    await ctx.send(embed=embed,view=view)
 
     
 @bot.command(name='tanmay')
