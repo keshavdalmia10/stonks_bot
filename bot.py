@@ -4,9 +4,13 @@ import random
 from discord import channel
 import yfinance as yf
 from discord.ext import commands
+from discord.ui import Button, View
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import discord
+
+
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -20,8 +24,8 @@ bot = commands.Bot(command_prefix='@!')
 #     view.add_item(button)
 #     await ctx.send("Hi!", view=view)
 
-top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
-                       'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
+# top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
+#                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
 
 stocks = {"RELIANCE":"Reliance Industries Ltd(L)", "ADANIPORTS":"Adani Ports and Special Economic Zone Ltd(L)", "ITC":"ITC Ltd(L)"}
 
@@ -70,8 +74,16 @@ async def get_list(ctx):
 #     if isinstance(error, commands.errors.CheckFailure):
 #         await ctx.send('You do not have the correct role for this command.')
 
+@bot.command()
+async def hello(ctx):
+    button=Button(label="click me", style=discord.BUttonStyle.green)
+    await ctx.send("Hi")
+
+
+
 @bot.command(name='stock', help='Enter the name of the company')
 async def stock(ctx,stock_name):
+    stock_name=stock_name+".NS"
     msft = yf.Ticker(stock_name)
     embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="For now just description", color=0xFF5733)
     embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
@@ -79,7 +91,18 @@ async def stock(ctx,stock_name):
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
     embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed.set_footer(text="Phone no: {}".format(msft.info['phone']))
+    
     await ctx.send(embed=embed)
+
+    
+@bot.command(name='tanmay')
+async def tanmay(ctx):
+    button=Button(label="Click me!", style=discord.ButtonStyle.green)
+    view = View()
+    view.add_item(button)
+    await ctx.send("Hi!", view=view)
+
+
 
 
 
