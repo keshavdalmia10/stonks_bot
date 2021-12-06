@@ -44,8 +44,10 @@ async def stock(ctx,stock_name):
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
     embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    embed2=discord.Embed(title="EMBED 2", description="THIS IS EMBED 2", color=0x5733FF)
-    button=Button(label="Click me!", style=discord.ButtonStyle.green)
+    embed2=discord.Embed(title=msft.news[0]['title'], url=msft.news[0]['link'], description="Publisher: {}".format(msft.news[0]['publisher']), color=0xFF5733)
+    for i in range (2,6):
+        embed2.add_field(name=msft.news[i]['title'], value="Publisher: {}".format(msft.news[0]['publisher']), inline=False)
+    button=Button(label="News", style=discord.ButtonStyle.green,emoji="📰")
     async def button_callback(interaction):
         await interaction.response.edit_message(embed=embed2, view=view)
     button.callback=button_callback
@@ -55,7 +57,15 @@ async def stock(ctx,stock_name):
     
     await ctx.send(embed=embed,view=view)
 
+@bot.command(name='news', help='Enter the name of the company')
+async def stock(ctx,stock_name):
+    stock_name=stock_name+".NS"
+    msft = yf.Ticker(stock_name)
     
+    await ctx.send(embed=embed)
+        
+
+
 @bot.command(name='tanmay')
 async def tanmay(ctx):
     embed=discord.Embed(title="Title", description="For now just description", color=0xFF5733)
