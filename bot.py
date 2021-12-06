@@ -57,12 +57,7 @@ async def stock(ctx,stock_name):
     
     await ctx.send(embed=embed,view=view)
 
-@bot.command(name='news', help='Enter the name of the company')
-async def stock(ctx,stock_name):
-    stock_name=stock_name+".NS"
-    msft = yf.Ticker(stock_name)
-    
-    await ctx.send(embed=embed)
+
         
 
 
