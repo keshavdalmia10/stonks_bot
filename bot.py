@@ -38,24 +38,52 @@ async def get_list(ctx):
 async def stock(ctx,stock_name):
     stock_name=stock_name+".NS"
     msft = yf.Ticker(stock_name)
-    embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="For now just description", color=0xFF5733)
+    embed1=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0xFF5733)
+    embed1.add_field(name="Previous Close", value=msft.info['previousClose'], inline=True)
+    embed1.add_field(name="Open", value=msft.info['open'], inline=True)
+    cap=format(msft.info['marketCap']/1000000000000, ".3f")
+    embed1.add_field(name="Market Cap", value="{}T".format(cap), inline=True)
+    embed1.add_field(name="Bid", value=msft.info['bid'], inline=True)
+    embed1.add_field(name="Beta", value=format(msft.info['beta'],".2f"), inline=True)
+    embed1.add_field(name="PE Ratio", value=format(msft.info['trailingPE'],".2f"), inline=True)
+    embed1.add_field(name="EPS", value=format(msft.info['trailingEps'],".2f"), inline=True)
+    embed1.add_field(name="Ask", value=msft.info['ask'], inline=True)
+    embed1.add_field(name="Day's Range", value="{} - {}".format(msft.info['dayLow'],msft.info['dayHigh']), inline=False)
+    embed1.add_field(name="52 week Range", value="{} - {}".format(msft.info['fiftyTwoWeekLow'],msft.info['fiftyTwoWeekHigh']), inline=False)
+    embed1.add_field(name="Forward Dividend & Yield", value="{}({}%)".format(msft.info['dividendRate'],msft.info['dividendYield']*100), inline=False)
+    embed1.add_field(name="Volume", value="{:,}".format(msft.info['volume']), inline=True)
+    embed1.add_field(name="Ex-Dividend Date", value=msft.info['exDividendDate'], inline=True)
+    embed1.add_field(name="Avg. Volume", value="{:,}".format(msft.info['averageVolume']), inline=True)
+    embed1.add_field(name="1y Target Est", value=msft.info['targetMeanPrice'], inline=True)
+    embed3=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0xFF5733)
     # embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
-    embed.set_thumbnail(url=msft.info['logo_url'])
-    embed.add_field(name="Country", value=msft.info['country'], inline=True)
-    embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
-    embed.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    embed3.set_thumbnail(url=msft.info['logo_url'])
+    embed3.add_field(name="Sector", value=msft.info['sector'], inline=True)
+    embed3.add_field(name="Industry", value=msft.info['industry'], inline=True)
+    embed3.set_footer(text="Requested by: {}".format(ctx.author.display_name))
     embed2=discord.Embed(title=msft.news[0]['title'], url=msft.news[0]['link'], description="Publisher: {}".format(msft.news[0]['publisher']), color=0xFF5733)
     for i in range (2,6):
         embed2.add_field(name=msft.news[i]['title'], value="Publisher: {}".format(msft.news[0]['publisher']), inline=False)
-    button=Button(label="News", style=discord.ButtonStyle.green,emoji="📰")
+    button1=Button(label="Analytics", style=discord.ButtonStyle.green,emoji="📊")
+    button2=Button(label="News", style=discord.ButtonStyle.green,emoji="📰")
+    button3=Button(label="About", style=discord.ButtonStyle.green,emoji="👁‍🗨")
+    async def button_callback(interaction):
+        await interaction.response.edit_message(embed=embed1, view=view)
+    button1.callback=button_callback
     async def button_callback(interaction):
         await interaction.response.edit_message(embed=embed2, view=view)
-    button.callback=button_callback
+    button2.callback=button_callback
+    async def button_callback(interaction):
+        await interaction.response.edit_message(embed=embed3, view=view)
+    button3.callback=button_callback
+    
     view=View()
     
-    view.add_item(button)
+    view.add_item(button1)
+    view.add_item(button2)
+    view.add_item(button3)
     
-    await ctx.send(embed=embed,view=view)
+    await ctx.send(embed=embed1,view=view)
 
 
         
