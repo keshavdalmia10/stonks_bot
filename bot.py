@@ -28,7 +28,7 @@ if not os.path.exists("images"):
 async def get_list(ctx):
     list=""
     for key, value in stocks.items():
-        temp=' {} : {}\n'.format(key, value)
+        temp='🔹 {} : {}\n'.format(key, value)
         list+=temp
     embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
     await ctx.send(embed=embed)
@@ -44,8 +44,11 @@ async def stock(ctx,stock_name):
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
     embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    embed2=discord.Embed(title="EMBED 2", description="THIS IS EMBED 2", color=0x5733FF)
     button=Button(label="Click me!", style=discord.ButtonStyle.green)
-
+    async def button_callback(interaction):
+        await interaction.response.edit_message(embed=embed2, view=view)
+    button.callback=button_callback
     view=View()
     
     view.add_item(button)
@@ -55,10 +58,15 @@ async def stock(ctx,stock_name):
     
 @bot.command(name='tanmay')
 async def tanmay(ctx):
+    embed=discord.Embed(title="Title", description="For now just description", color=0xFF5733)
+    embed2=discord.Embed(title="EMBED 2", description="THIS IS EMBED 2", color=0x5733FF)
     button=Button(label="Click me!", style=discord.ButtonStyle.green, emoji="😊" )
+    async def button_callback(interaction):
+        await interaction.response.edit_message(content="You clicked",embed=embed2, view=None)
+    button.callback=button_callback
     view = View()
     view.add_item(button)
-    await ctx.send("Hi!", view=view)
+    await ctx.send("Hi!",embed=embed, view=view)
 
 
 
