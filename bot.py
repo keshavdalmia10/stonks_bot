@@ -1,7 +1,7 @@
 # bot.py
 import os
 import random
-from discord import channel
+from discord import channel, emoji
 import yfinance as yf
 from discord.ext import commands
 from discord.ui import Button, View
@@ -46,13 +46,15 @@ async def nine_nine(ctx):
     response = random.choice(brooklyn_99_quotes)
     await ctx.send(response)
 
+
 @bot.command(name="get-list", help="Check list of companies for which stock details can be fetched.")
 async def get_list(ctx):
+    list=""
     for key, value in stocks.items():
-        # await ctx.send(key)
-        # await ctx.send(value)
-
-        await ctx.send(' {} : {}'.format(key, value))
+        temp=' {} : {}\n'.format(key, value)
+        list+=temp
+    embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
+    await ctx.send(embed=embed)
 # @bot.command(name='roll_dice', help='Simulates rolling dice.')
 # async def roll(ctx, number_of_dice: int, number_of_sides: int):
 #     dice = [
@@ -86,11 +88,11 @@ async def stock(ctx,stock_name):
     stock_name=stock_name+".NS"
     msft = yf.Ticker(stock_name)
     embed=discord.Embed(title=msft.info['longName'], url=msft.info['website'], description="For now just description", color=0xFF5733)
-    embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
+    # embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
     embed.set_thumbnail(url=msft.info['logo_url'])
     embed.add_field(name="Country", value=msft.info['country'], inline=True)
     embed.add_field(name="Sector", value=msft.info['sector'], inline=True)
-    embed.set_footer(text="Phone no: {}".format(msft.info['phone']))
+    embed.set_footer(text="Requested by: {}".format(ctx.author.display_name))
     button=Button(label="Click me!", style=discord.ButtonStyle.green)
 
     view=View()
@@ -103,7 +105,7 @@ async def stock(ctx,stock_name):
     
 @bot.command(name='tanmay')
 async def tanmay(ctx):
-    button=Button(label="Click me!", style=discord.ButtonStyle.green)
+    button=Button(label="Click me!", style=discord.ButtonStyle.green, emoji="😊" )
     view = View()
     view.add_item(button)
     await ctx.send("Hi!", view=view)
