@@ -9,42 +9,19 @@ from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import discord
 
-
-
-
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='@!')
 
-# @bot.command(name="ok")
-# async def hello(ctx):
-#     button=Button(label="Click me!", style=discord.ButtonStyle.green,)
-#     view=View()
-#     view.add_item(button)
-#     await ctx.send("Hi!", view=view)
 
-# top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
-#                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
+top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
+                       'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
 
 stocks = {"RELIANCE":"Reliance Industries Ltd(L)", "ADANIPORTS":"Adani Ports and Special Economic Zone Ltd(L)", "ITC":"ITC Ltd(L)"}
 
 if not os.path.exists("images"):
     os.mkdir("images")
-
-@bot.command(name='99',help='Aese hee sexy lag raha tha')
-async def nine_nine(ctx):
-    brooklyn_99_quotes = [
-        'I\'m the human form of the 💯 emoji.',
-        'Bingpot!',
-        (
-            'Cool. Cool cool cool cool cool cool cool, '
-            'no doubt no doubt no doubt no doubt.'
-        ),
-    ]
-    
-    response = random.choice(brooklyn_99_quotes)
-    await ctx.send(response)
 
 
 @bot.command(name="get-list", help="Check list of companies for which stock details can be fetched.")
@@ -55,32 +32,6 @@ async def get_list(ctx):
         list+=temp
     embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
     await ctx.send(embed=embed)
-# @bot.command(name='roll_dice', help='Simulates rolling dice.')
-# async def roll(ctx, number_of_dice: int, number_of_sides: int):
-#     dice = [
-#         str(random.choice(range(1, number_of_sides + 1))) for _ in range(number_of_dice)
-        
-#     ]
-#     await ctx.send(', '.join(dice))
-
-# @bot.command(name='create-channel')
-# @commands.has_role('admin')
-# async def create_channel(ctx, channel_name='real-python'):
-#     guild = ctx.guild
-#     existing_channel = discord.utils.get(guild.channels, name=channel_name)
-#     if not existing_channel:
-#         print(f'Creating a new channel: {channel_name}')
-#         await guild.create_text_channel(channel_name)
-# @bot.event
-# async def on_command_error(ctx, error):
-#     if isinstance(error, commands.errors.CheckFailure):
-#         await ctx.send('You do not have the correct role for this command.')
-
-@bot.command()
-async def hello(ctx):
-    button=Button(label="click me", style=discord.BUttonStyle.green)
-    await ctx.send("Hi")
-
 
 
 @bot.command(name='stock', help='Enter the name of the company')
@@ -99,7 +50,6 @@ async def stock(ctx,stock_name):
     
     view.add_item(button)
     
-    
     await ctx.send(embed=embed,view=view)
 
     
@@ -112,14 +62,6 @@ async def tanmay(ctx):
 
 
 
-
-
-
-# @bot.command()
-# async def embed(ctx):
-#     embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0xFF5733)
-#     embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
-#     await ctx.send(embed=embed)
 
 @bot.command(name="prev-stock-data", help="Check previous day stock data of a company.")
 async def stock_data(ctx, stock_company):
