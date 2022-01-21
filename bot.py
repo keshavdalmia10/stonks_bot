@@ -7,6 +7,8 @@ from discord.ext import commands
 from discord.ui import Button, View
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
+from bs4 import BeautifulSoup
+import requests
 import discord
 
 load_dotenv()
@@ -32,6 +34,55 @@ async def get_list(ctx):
         list+=temp
     embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
     await ctx.send(embed=embed)
+
+@bot.command(name='dailystats', help='Provides daily stats')
+async def get_list(ctx):
+    d=[':one:',':two:',':three:',':four:',':five:',':six:',':seven:',':eight:',':nine:']
+    html_text=requests.get('https://www.moneycontrol.com/stocks/marketstats/nsegainer/index.php').text
+    soup= BeautifulSoup(html_text,'lxml')
+    top_table=soup.find('div', class_='bsr_table hist_tbl_hm')
+    comp_table=top_table.find('tbody')
+    comp_rows=comp_table.find('tr')
+    embedgain=discord.Embed(title='Top Gainers', color=0xFF5733)
+    embedlose=discord.Embed(title='Top Losers', color=0xFF5733)
+    for i in range(5):
+        namee=comp_rows.td.span.h3.a.text
+        high=comp_rows.next_element.next_element.next_sibling.next_sibling
+        low=high.next_sibling.next_element
+        last_price=low.next_sibling.next_element
+        prev_close=last_price.next_sibling.next_element
+        change=prev_close.next_sibling.next_element
+        gain=change.next_sibling.next_element
+        embedgain.add_field(name='{} {}- `{}`**%**'.format(d[i],namee,gain.text), value="*High*-{}\n*Low*-{} \n*Last price*-{}\n*Prevclose*-{}  *Change*-{} ".format(high.text,low.text,last_price.text,prev_close.text,change.text), inline=False)
+        comp_rows=comp_rows.next_sibling.next_element
+
+    html_text2=requests.get('https://www.moneycontrol.com/stocks/marketstats/nseloser/index.php').text
+    soup2= BeautifulSoup(html_text2,'lxml')
+    top_table2=soup2.find('div', class_='bsr_table hist_tbl_hm')
+    comp_table2=top_table2.find('tbody')
+    comp_rows2=comp_table2.find('tr')
+    for i in range(5):
+        namee=comp_rows2.td.span.h3.a.text
+        high=comp_rows2.next_element.next_element.next_sibling.next_sibling
+        low=high.next_sibling.next_element
+        last_price=low.next_sibling.next_element
+        prev_close=last_price.next_sibling.next_element
+        change=prev_close.next_sibling.next_element
+        gain=change.next_sibling.next_element    
+        embedlose.add_field(name='{} {}- `{}`**%**'.format(d[i],namee,gain.text), value="*High*-{}\n*Low*-{} \n*Last price*-{}\n*Prevclose*-{}  *Change*-{} ".format(high.text,low.text,last_price.text,prev_close.text,change.text), inline=False)
+        comp_rows2=comp_rows2.next_sibling.next_element
+    button1=Button(label="Top Gainers", style=discord.ButtonStyle.green,emoji="🔺")  
+    button2=Button(label="Top Losers", style=discord.ButtonStyle.green,emoji="🔻")
+    async def button_callback(interaction):
+        await interaction.response.edit_message(embed=embedgain, view=view)
+    button1.callback=button_callback
+    async def button_callback(interaction):
+        await interaction.response.edit_message(embed=embedlose, view=view)
+    button2.callback=button_callback
+    view=View()
+    view.add_item(button1)
+    view.add_item(button2)
+    await ctx.send(embed=embedgain,view=view)
 
 
 @bot.command(name='stock', help='Enter the name of the company')
