@@ -1,7 +1,7 @@
 # bot.py
 import os
 import random
-from discord import channel, emoji
+from discord import emoji,channel
 import yfinance as yf
 from discord.ext import commands
 from discord.ui import Button, View
@@ -11,10 +11,17 @@ from bs4 import BeautifulSoup
 import requests
 import discord
 
+
+
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='@!')
+intents = discord.Intents().all()
+
+
+
+bot = commands.Bot(command_prefix='@!',intents=intents)
 
 
 top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
