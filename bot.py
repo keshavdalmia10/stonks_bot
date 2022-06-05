@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from bs4 import BeautifulSoup
 import requests
 import discord
+import plotly.graph_objects as go
+import pandas as pd
 
 
 
@@ -143,6 +145,20 @@ async def stock(ctx,stock_name):
     
     await ctx.send(embed=embed1,view=view)
 
+@bot.command(name='chart', help='Enter the name of the company')
+async def stock_data(ctx, stock_company):
+    stock = yf.Ticker('TSLA')
+    data = stock.history(period="100d")
+    data.to_csv('yahoo.csv')
+
+    df = pd.read_csv('yahoo.csv')
+    candlestick = go.Candlestick(x=df['Date'], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'])
+    fig = go.Figure(data=[candlestick])
+    fig.write_image("images/yourfile.png") 
+
+    await ctx.send(file=discord.File('images/yourfile.png'))
+    os.remove('images/yourfile.png')
+
 
         
 
@@ -202,3 +218,6 @@ def create_msg(top_stock_company, top_stock_company_df):
 
     return msg      
 bot.run(TOKEN)
+
+
+
