@@ -1,7 +1,7 @@
 # bot.py
 import os
 import random
-from discord import channel, emoji
+from discord import emoji,channel
 import yfinance as yf
 from discord.ext import commands
 from discord.ui import Button, View
@@ -10,17 +10,21 @@ import matplotlib.pyplot as plt
 from bs4 import BeautifulSoup
 import requests
 import discord
+import plotly.graph_objects as go
+import pandas as pd
+
+
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+
 intents = discord.Intents().all()
-i=10
+
+
+
 bot = commands.Bot(command_prefix='@!',intents=intents)
-if(i>9):    
-    async def gg():
-        channel = bot.get_channel(753269986520465571)
-        await channel.send('hello') 
-    print("heal")
+
 
 top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
@@ -142,6 +146,20 @@ async def stock(ctx,stock_name):
     
     await ctx.send(embed=embed1,view=view)
 
+@bot.command(name='chart', help='Enter the name of the company')
+async def stock_data(ctx, stock_company):
+    stock = yf.Ticker('TSLA')
+    data = stock.history(period="100d")
+    data.to_csv('yahoo.csv')
+
+    df = pd.read_csv('yahoo.csv')
+    candlestick = go.Candlestick(x=df['Date'], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'])
+    fig = go.Figure(data=[candlestick])
+    fig.write_image("images/yourfile.png") 
+
+    await ctx.send(file=discord.File('images/yourfile.png'))
+    os.remove('images/yourfile.png')
+
 
 
 
@@ -225,3 +243,6 @@ def create_msg(top_stock_company, top_stock_company_df):
 
     return msg      
 bot.run(TOKEN)
+
+
+
