@@ -13,9 +13,14 @@ import discord
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-
-bot = commands.Bot(command_prefix='@!')
-
+intents = discord.Intents().all()
+i=10
+bot = commands.Bot(command_prefix='@!',intents=intents)
+if(i>9):    
+    async def gg():
+        channel = bot.get_channel(753269986520465571)
+        await channel.send('hello') 
+    print("heal")
 
 top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
@@ -85,6 +90,7 @@ async def get_list(ctx):
     await ctx.send(embed=embedgain,view=view)
 
 
+
 @bot.command(name='stock', help='Enter the name of the company')
 async def stock(ctx,stock_name):
     stock_name=stock_name+".NS"
@@ -137,7 +143,6 @@ async def stock(ctx,stock_name):
     await ctx.send(embed=embed1,view=view)
 
 
-        
 
 
 @bot.command(name='tanmay')
@@ -151,7 +156,32 @@ async def tanmay(ctx):
     view = View()
     view.add_item(button)
     await ctx.send("Hi!",embed=embed, view=view)
+    
 
+    
+@bot.command(name='ipo')
+async def tanmay(ctx):
+    list=""
+    ipohtml_text=requests.get('https://zerodha.com/ipo/').text
+    iposoup= BeautifulSoup(ipohtml_text,'lxml')
+    iposection=iposoup.find('section', id='ipo')
+    upcoming_ipo_talbe = iposection.find('tbody')
+    n=len(upcoming_ipo_talbe.find_all("tr")) # no.of upcoming IPOs
+    iporow=upcoming_ipo_talbe.find('tr')
+    for i in range (n):
+        stock=iporow.td
+        date=stock.next_sibling.next_element                             #IPO date
+        listing_date=date.next_sibling.next_element                      #listing date
+        price_range=listing_date.next_sibling.next_element               #price range
+        min_qnt=price_range.next_sibling.next_element                    #min quantity  
+        rhp_link=min_qnt.next_sibling.next_element.find('a').get('href')
+        temp="🔹 **{}** : {}\n".format(stock.text.lstrip().rstrip(), "[RHP]"+"("+rhp_link+")")
+        list+=temp
+        iporow=iporow.next_sibling.next_element
+    ipoembed=discord.Embed(title="Upcoming IPOs", description=list, color=0xFF5733)
+    view = View()
+    await ctx.send(embed=ipoembed, view=view)
+   
 
 
 
