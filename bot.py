@@ -12,6 +12,8 @@ import requests
 import discord
 import plotly.graph_objects as go
 import pandas as pd
+import requests, json, random, datetime, asyncio
+
 
 
 
@@ -34,6 +36,33 @@ stocks = {"RELIANCE":"Reliance Industries Ltd(L)", "ADANIPORTS":"Adani Ports and
 if not os.path.exists("images"):
     os.mkdir("images")
 
+# @bot.command(name="gif",help="Check list of companies for which stock details can be fetched.")
+async def schedule_daily_message():
+	while True:
+		now = datetime.datetime.now()
+		# then = now+datetime.timedelta(days=1)
+		then = now.replace(hour=20, minute=42)
+		wait_time = (then-now).total_seconds()
+		await asyncio.sleep(wait_time)
+         
+
+		channel = bot.get_channel(753269986520465571)
+
+		await channel.send("Good morning!!")
+
+@bot.event
+async def on_ready():
+
+	await schedule_daily_message()
+
+# CHANNEL_ID=1234
+
+# @aiocron.crontab('0 * * * *')
+# async def cornjob1():
+#     channel = bot.get_channel(CHANNEL_ID)
+#     await channel.send('Hour Cron Test')
+	
+
 
 @bot.command(name="get-list", help="Check list of companies for which stock details can be fetched.")
 async def get_list(ctx):
@@ -42,7 +71,9 @@ async def get_list(ctx):
         temp='🔹 {} : {}\n'.format(key, value)
         list+=temp
     embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
+    
     await ctx.send(embed=embed)
+    print(embed)
 
 @bot.command(name='dailystats', help='Provides daily stats')
 async def get_list(ctx):
