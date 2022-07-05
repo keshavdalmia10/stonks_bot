@@ -2,7 +2,7 @@ import pandas as pd
 import yfinance as yf
 import plotly.graph_objects as go
 
-stock = yf.Ticker('TSLA')
+stock = yf.Ticker('MSFT')
 data = stock.history(period="100d")
 data.to_csv('yahoo.csv')
 

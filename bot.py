@@ -1,10 +1,13 @@
 # bot.py
+from asyncio.windows_events import NULL
+from dis import disco
 import os
 import random
+from re import A
 from discord import emoji,channel
 import yfinance as yf
 from discord.ext import commands
-from discord.ui import Button, View
+from discord.ui import Button, View, Select
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from bs4 import BeautifulSoup
@@ -27,6 +30,7 @@ intents = discord.Intents().all()
 
 bot = commands.Bot(command_prefix='@!',intents=intents)
 
+announce_channel_id = 0
 
 top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
@@ -36,24 +40,62 @@ stocks = {"RELIANCE":"Reliance Industries Ltd(L)", "ADANIPORTS":"Adani Ports and
 if not os.path.exists("images"):
     os.mkdir("images")
 
-# @bot.command(name="gif",help="Check list of companies for which stock details can be fetched.")
-async def schedule_daily_message():
-	while True:
-		now = datetime.datetime.now()
-		# then = now+datetime.timedelta(days=1)
-		then = now.replace(hour=20, minute=42)
-		wait_time = (then-now).total_seconds()
-		await asyncio.sleep(wait_time)
-         
 
-		channel = bot.get_channel(753269986520465571)
-
-		await channel.send("Good morning!!")
+# async def schedule_daily_message():
+# 		now = datetime.datetime.now()
+# 		# then = now+datetime.timedelta(days=1)
+# 		then = now.replace(hour=1, minute=32,second=59)
+# 		wait_time = (then-now).total_seconds()
+# 		channel = bot.get_channel(979094994608594994)
+# 		await asyncio.sleep(wait_time) 
+# 		await channel.send("IT's TIME")
 
 @bot.event
 async def on_ready():
+    while True:
+        # channel = bot.get_channel(753269986520465571)
+        # embed=discord.Embed(title=":bell: MARKET DOWN :bell: ", description="Market donw at {}".format(123), color=0xFF5733)
+        # await channel.send(embed=embed)
+        # break
+        now = datetime.datetime.now()
+        day = now.strftime("%a")
+        if(day == "Sat"):
+            next_mon = now + datetime.timedelta(days = 2)
+            next_mon_time = next_mon.replace(hour=9,minute=0,second=0)
+            wait_time = next_mon_time - now
+            print(wait_time.total_seconds())
+            await asyncio.sleep(wait_time.total_seconds())
+        if(day == "Sun"):
+            next_mon = now + datetime.timedelta(days = 1)
+            next_mon_time = next_mon.replace(hour=9,minute=0,second=0)
+            wait_time = next_mon_time - now
+            print(wait_time.total_seconds())
+            await asyncio.sleep(wait_time.total_seconds())
+        
+        start = now.replace(hour=9,minute=0,second=0)
+        end = now.replace(hour=15,minute=30,second=0)
+        if(now < start):
+            wait_time = start - now
+            print(wait_time.total_seconds())
+            await asyncio.sleep(wait_time.total_seconds())
+        if(now > end):
+            next_day = now + datetime.timedelta(days = 1)
+            next_day_time = next_day.replace(hour=9,minute=0,second=0)
+            wait_time = next_day_time - now
+            print(wait_time.total_seconds())
+            await asyncio.sleep(wait_time.total_seconds())
 
-	await schedule_daily_message()
+        nifty50 = yf.Ticker("^NSEI")
+        marketprice = nifty50.info['regularMarketPrice']
+        marketprevclose = nifty50.info['previousClose']
+        market_percent = round((((marketprice - marketprevclose) / (marketprevclose)) * 100),2)
+        if(market_percent < 1):
+            channel = bot.get_channel(announce_channel_id)
+            embed=discord.Embed(title=":bell::bell: MARKET DOWN :bell::bell: ", description="NIFTY 50 is at {}%".format(market_percent), color=0xFF5733)
+            await channel.send(embed=embed)
+        await asyncio(1200) 
+        
+        
 
 # CHANNEL_ID=1234
 
@@ -62,7 +104,14 @@ async def on_ready():
 #     channel = bot.get_channel(CHANNEL_ID)
 #     await channel.send('Hour Cron Test')
 	
-
+@bot.command(name = "ac-channel")
+async def sending(ctx, channel: discord.TextChannel):
+    global announce_channel_id
+    announce_channel_id = channel.id
+    await ctx.send(channel.id)
+    
+     
+     
 
 @bot.command(name="get-list", help="Check list of companies for which stock details can be fetched.")
 async def get_list(ctx):
@@ -73,7 +122,7 @@ async def get_list(ctx):
     embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
     
     await ctx.send(embed=embed)
-    print(embed)
+    
 
 @bot.command(name='dailystats', help='Provides daily stats')
 async def get_list(ctx):
@@ -129,9 +178,22 @@ async def get_list(ctx):
 @bot.command(name='stock', help='Enter the name of the company')
 async def stock(ctx,stock_name):
     stock_name=stock_name+".NS"
+    color_embed = 0x000000
     msft = yf.Ticker(stock_name)
-    embed1=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0xFF5733)
-    embed1.add_field(name="Previous Close", value=msft.info['previousClose'], inline=True)
+    price = msft.info['regularMarketPrice']
+    prev_close = msft.info['previousClose']
+    if(price >prev_close):
+        embed1=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0x008000)
+        color_embed=0x008000
+        embed1.add_field(name="🔺{}".format(price),value='\u200b', inline=False)
+        # embed1.add_field('\u200b', '\u200b')
+    else:
+        embed1=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0xFF0000)
+        color_embed = 0xFF0000
+        embed1.add_field(name="🔻{}".format(price),value='\u200b', inline=False)
+        # embed1.add_field('\u200b', '\u200b',)
+
+    embed1.add_field(name="Previous Close", value=prev_close, inline=True)
     embed1.add_field(name="Open", value=msft.info['open'], inline=True)
     cap=format(msft.info['marketCap']/1000000000000, ".3f")
     embed1.add_field(name="Market Cap", value="{}T".format(cap), inline=True)
@@ -147,18 +209,18 @@ async def stock(ctx,stock_name):
     embed1.add_field(name="Ex-Dividend Date", value=msft.info['exDividendDate'], inline=True)
     embed1.add_field(name="Avg. Volume", value="{:,}".format(msft.info['averageVolume']), inline=True)
     embed1.add_field(name="1y Target Est", value=msft.info['targetMeanPrice'], inline=True)
-    embed3=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=0xFF5733)
-    # embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
+    embed3=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=color_embed)
+   # embed3.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
     embed3.set_thumbnail(url=msft.info['logo_url'])
     embed3.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed3.add_field(name="Industry", value=msft.info['industry'], inline=True)
     embed3.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    embed2=discord.Embed(title=msft.news[0]['title'], url=msft.news[0]['link'], description="Publisher: {}".format(msft.news[0]['publisher']), color=0xFF5733)
+    embed2=discord.Embed(title=msft.news[0]['title'], url=msft.news[0]['link'], description="Publisher: {}".format(msft.news[0]['publisher']), color=color_embed)
     for i in range (2,6):
         embed2.add_field(name=msft.news[i]['title'], value="Publisher: {}".format(msft.news[0]['publisher']), inline=False)
-    button1=Button(label="Analytics", style=discord.ButtonStyle.green,emoji="📊")
-    button2=Button(label="News", style=discord.ButtonStyle.green,emoji="📰")
-    button3=Button(label="About", style=discord.ButtonStyle.green,emoji="👁‍🗨")
+    button1=Button(label="Analytics", style=discord.ButtonStyle.blurple,emoji="📊")
+    button2=Button(label="News", style=discord.ButtonStyle.gray,emoji="📰")
+    button3=Button(label="About", style=discord.ButtonStyle.danger,emoji="👁‍🗨")
     async def button_callback(interaction):
         await interaction.response.edit_message(embed=embed1, view=view)
     button1.callback=button_callback
@@ -179,8 +241,8 @@ async def stock(ctx,stock_name):
 
 @bot.command(name='chart', help='Enter the name of the company')
 async def stock_data(ctx, stock_company):
-    stock = yf.Ticker('TSLA')
-    data = stock.history(period="100d")
+    stock = yf.Ticker(stock_company)
+    data = stock.history(period="1y")
     data.to_csv('yahoo.csv')
 
     df = pd.read_csv('yahoo.csv')
@@ -189,7 +251,8 @@ async def stock_data(ctx, stock_company):
     fig.write_image("images/yourfile.png") 
 
     await ctx.send(file=discord.File('images/yourfile.png'))
-    os.remove('images/yourfile.png')
+    #os.remove('images/yourfile.png')
+    # os.remove('yahoo.csv')
 
 
 
@@ -205,7 +268,32 @@ async def tanmay(ctx):
     view = View()
     view.add_item(button)
     await ctx.send("Hi!",embed=embed, view=view)
-    
+
+@bot.command(name='menu')
+async def tanmay(ctx,company):
+    company = company +".NS"
+    select = Select(placeholder="Choose time period", options=[
+        discord.SelectOption(label="1 month", value="1mo"),
+        discord.SelectOption(label="100 days",value="100d"),
+        discord.SelectOption(label="1 year", value="1y"),
+    ],)
+    async def my_callback(interaction):
+        t = select.values[0]
+        stock = yf.Ticker(company)
+        #title = stock.info['longName']
+        data = stock.history(period=t)
+        data.to_csv('yahoo.csv')
+        df = pd.read_csv('yahoo.csv')
+        candlestick = go.Candlestick(x=df['Date'], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'])
+        fig = go.Figure(data=[candlestick])
+        fig.update_layout(title_text="{} - {}".format(company,t),title_x=0.5)
+        fig.write_image("images/yourfile.png") 
+        await interaction.response.send_message(file=discord.File('images/yourfile.png'))
+
+    select.callback=my_callback
+    view = View()
+    view.add_item(select)
+    await ctx.send("Choose",view=view)
 
     
 @bot.command(name='ipo')
@@ -230,6 +318,7 @@ async def tanmay(ctx):
     ipoembed=discord.Embed(title="Upcoming IPOs", description=list, color=0xFF5733)
     view = View()
     await ctx.send(embed=ipoembed, view=view)
+    await ctx.send(announce_channel_id)
    
 
 
