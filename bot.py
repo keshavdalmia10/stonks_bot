@@ -16,7 +16,7 @@ import discord
 import plotly.graph_objects as go
 import pandas as pd
 import requests, json, random, datetime, asyncio
-
+from database import *
 
 
 
@@ -57,6 +57,21 @@ async def on_ready():
         # embed=discord.Embed(title=":bell: MARKET DOWN :bell: ", description="Market donw at {}".format(123), color=0xFF5733)
         # await channel.send(embed=embed)
         # break
+        # selected_company = ['RELIANCE']
+        # print(selected_company)
+        # for i in selected_company:
+        #     print(i)
+        #     company = yf.Ticker("{}.NS".format(i))
+        #     company_price = company.info['regularMarketPrice']
+        #     comp_prevclose = company.info['previousClose']
+        #     comp_per = round((((company_price - comp_prevclose) / (comp_prevclose)) * 100),2)
+        #     print(comp_per)
+        #     if(comp_per < 0):
+        #         user_array = see_user(i)
+        #         for y in user_array:
+        #             user = await bot.fetch_user(y)
+        #             await user.send("🛑 {} is running very low".format(i))
+        # break
         now = datetime.datetime.now()
         day = now.strftime("%a")
         if(day == "Sat"):
@@ -89,26 +104,30 @@ async def on_ready():
         marketprice = nifty50.info['regularMarketPrice']
         marketprevclose = nifty50.info['previousClose']
         market_percent = round((((marketprice - marketprevclose) / (marketprevclose)) * 100),2)
-        if(market_percent < 1):
+        if(market_percent < -1):
             channel = bot.get_channel(announce_channel_id)
             embed=discord.Embed(title=":bell::bell: MARKET DOWN :bell::bell: ", description="NIFTY 50 is at {}%".format(market_percent), color=0xFF5733)
             await channel.send(embed=embed)
-        await asyncio(1200) 
-        
+        selected_company = auto_check_company()
+        for i in selected_company:
+            company = yf.Ticker("{}.NS".format(i))
+            company_price = company.info['regularMarketPrice']
+            comp_prevclose = company.info['previousClose']
+            comp_per = round((((company_price - comp_prevclose) / (comp_prevclose)) * 100),2)
+            if(comp_per < -1):
+                user_array = see_user(i)
+                for y in user_array:
+                    user = await bot.fetch_user(y)
+                    await user.send("🛑 {} is running very low".format(i))
+        await asyncio(10,800) 
         
 
-# CHANNEL_ID=1234
-
-# @aiocron.crontab('0 * * * *')
-# async def cornjob1():
-#     channel = bot.get_channel(CHANNEL_ID)
-#     await channel.send('Hour Cron Test')
 	
 @bot.command(name = "ac-channel")
 async def sending(ctx, channel: discord.TextChannel):
     global announce_channel_id
     announce_channel_id = channel.id
-    await ctx.send(channel.id)
+    await ctx.send("Announcements will now be sent to "+channel.mention +" channel")
     
      
      
@@ -210,7 +229,7 @@ async def stock(ctx,stock_name):
     embed1.add_field(name="Avg. Volume", value="{:,}".format(msft.info['averageVolume']), inline=True)
     embed1.add_field(name="1y Target Est", value=msft.info['targetMeanPrice'], inline=True)
     embed3=discord.Embed(title=msft.info['longName'], url=msft.info['website'], color=color_embed)
-   # embed3.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", author=ctx.author.avatar_url)
+    embed3.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
     embed3.set_thumbnail(url=msft.info['logo_url'])
     embed3.add_field(name="Sector", value=msft.info['sector'], inline=True)
     embed3.add_field(name="Industry", value=msft.info['industry'], inline=True)
@@ -255,11 +274,56 @@ async def stock_data(ctx, stock_company):
     # os.remove('yahoo.csv')
 
 
+@bot.command(name='select')
+async def selection(ctx,*,companies):
+    author = str(ctx.author)
+    stock =[]
+    a = companies.split(',')
+    for i in a:
+        b = i.strip()
+        stock.append(b)
+    if(check_company(stock)):
+        user_id=str(ctx.author.id)
+        add_company(author,stock,user_id)
+        await ctx.send("💥 Added successfully 💥 !!")
+    else:
+        await ctx.send("⛔ Wrong input ⛔")
 
+
+@bot.command(name='delete')
+async def selection(ctx,*,companies):
+    author = str(ctx.author)
+    stock =[]
+    a = companies.split(',')
+    for i in a:
+        b = i.strip()
+        stock.append(b)
+    if(check_company(stock)):
+        delete_company(author,stock)
+    await ctx.send("✂ Deleted successfully ✂ !!") 
+
+
+@bot.command(name='check')
+async def selection(ctx):
+    author = str(ctx.author)
+    list=""
+    user_companies = see_company(author)
+    for i in user_companies:
+        company = yf.Ticker("{}.NS".format(i))
+        company_price = company.info['regularMarketPrice']
+        comp_prevclose = company.info['previousClose']
+        comp_per = round((((company_price - comp_prevclose) / (comp_prevclose)) * 100),2)
+        if(comp_per > 0):
+            temp="**{}**  🟢\n".format(i)
+        else:
+            temp="**{}**  🔴\n".format(i)
+        list+=temp
+    embed=discord.Embed(title="{}'s companies".format(ctx.author.display_name),description = list, color=0xFF5733)
+    await ctx.send(embed=embed)
 
 @bot.command(name='tanmay')
 async def tanmay(ctx):
-    embed=discord.Embed(title="Title", description="For now just description", color=0xFF5733)
+    embed=discord.Embed(title="Title", description="For now just description", color=0xE69527)
     embed2=discord.Embed(title="EMBED 2", description="THIS IS EMBED 2", color=0x5733FF)
     button=Button(label="Click me!", style=discord.ButtonStyle.green, emoji="😊" )
     async def button_callback(interaction):
@@ -268,6 +332,14 @@ async def tanmay(ctx):
     view = View()
     view.add_item(button)
     await ctx.send("Hi!",embed=embed, view=view)
+    await ctx.author.send("Yo")
+
+@bot.command(name='hmm')
+async def tanmay(ctx):
+    user = await bot.fetch_user(534491042494283776)
+    print(type(ctx.author.id))
+    await user.send("Hello there!")
+
 
 @bot.command(name='menu')
 async def tanmay(ctx,company):
@@ -312,15 +384,13 @@ async def tanmay(ctx):
         price_range=listing_date.next_sibling.next_element               #price range
         min_qnt=price_range.next_sibling.next_element                    #min quantity  
         rhp_link=min_qnt.next_sibling.next_element.find('a').get('href')
-        temp="🔹 **{}** : {}\n".format(stock.text.lstrip().rstrip(), "[RHP]"+"("+rhp_link+")")
+        temp=":dollar:  **{}** : {}\n".format(stock.text.lstrip().rstrip(), "[RHP]"+"("+rhp_link+")")
         list+=temp
         iporow=iporow.next_sibling.next_element
     ipoembed=discord.Embed(title="Upcoming IPOs", description=list, color=0xFF5733)
     view = View()
     await ctx.send(embed=ipoembed, view=view)
-    await ctx.send(announce_channel_id)
    
-
 
 
 @bot.command(name="prev-stock-data", help="Check previous day stock data of a company.")
