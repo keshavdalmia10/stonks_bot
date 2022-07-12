@@ -59,5 +59,11 @@ Interactive discord bot where users can interact with the bot to view company st
 #### Upcoming Ipo 
 <img src="https://user-images.githubusercontent.com/53507833/178600890-bb2eafa7-3880-47f5-8b82-9f9480dbcd37.gif" width=350>
 
+### Market Down notify
+<img src="https://user-images.githubusercontent.com/53507833/178603833-01489204-aec0-42da-abb4-9206de64ccdd.JPG" width=350>
+
+
+### User company notify in DMs
+<img src="https://user-images.githubusercontent.com/53507833/178603886-c8d50304-a553-4698-8956-2baab11cca5d.JPG" width=350>
 
     
