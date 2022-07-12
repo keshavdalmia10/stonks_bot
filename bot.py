@@ -20,7 +20,6 @@ from database import *
 
 
 
-
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -35,7 +34,15 @@ announce_channel_id = 0
 top_stock_companies = ['AAPL', 'GOOGL', 'TSLA', 'MSFT', 'AMZN', 'FB', 'BRK-B', 'SPY',
                        'BABA', 'JPM', 'WMT', 'V', 'T', 'UNH', 'PFE', 'INTC', 'VZ', 'ORCL','RELIANCE.NS']
 
-stocks = {"RELIANCE":"Reliance Industries Ltd(L)", "ADANIPORTS":"Adani Ports and Special Economic Zone Ltd(L)", "ITC":"ITC Ltd(L)"}
+stocks = {"RELIANCE" : "Reliance Industries Ltd(L)", 
+          "ADANIPORTS" : "Adani Ports and Special Economic Zone Ltd(L)",
+          "ITC" : "ITC Ltd(L)",
+          "TCS" : "TATA Consultancy Services",
+          "HDFCBANK" : "HDFC Bank Limited",
+          "INFY" : "Infosys Ltd",
+          "ICICIBANK" : "ICICI Bank Ltd",
+          "HINDUNILVR" : "Hindustan Unilever Ltd",
+          "SBIN" : "State Bank of India" }
 
 if not os.path.exists("images"):
     os.mkdir("images")
@@ -54,7 +61,7 @@ if not os.path.exists("images"):
 async def on_ready():
     while True:
         # channel = bot.get_channel(753269986520465571)
-        # embed=discord.Embed(title=":bell: MARKET DOWN :bell: ", description="Market donw at {}".format(123), color=0xFF5733)
+        # embed=discord.Embed(title=":bell: MARKET DOWN :bell: ", description="Market down at {}".format(123), color=0xFF5733)
         # await channel.send(embed=embed)
         # break
         # selected_company = ['RELIANCE']
@@ -128,9 +135,16 @@ async def sending(ctx, channel: discord.TextChannel):
     global announce_channel_id
     announce_channel_id = channel.id
     await ctx.send("Announcements will now be sent to "+channel.mention +" channel")
-    
-     
-     
+
+@bot.command(name = "crypto")
+async def sending(ctx,crypto): 
+    name = crypto 
+    crypto = crypto + "USDT"  
+    key = "https://api.binance.com/api/v3/ticker/price?symbol="+str(crypto)
+    data = requests.get(key)  
+    data = data.json()
+    price = data['price']
+    await ctx.send(f"{name} is currently at ${price}")
 
 @bot.command(name="get-list", help="Check list of companies for which stock details can be fetched.")
 async def get_list(ctx):
@@ -138,7 +152,7 @@ async def get_list(ctx):
     for key, value in stocks.items():
         temp='🔹 {} : {}\n'.format(key, value)
         list+=temp
-    embed=discord.Embed(title="List of Companies", description=list, color=0x57FF33)
+    embed=discord.Embed(title="List of Top Companies", description=list, color=0x57FF33)
     
     await ctx.send(embed=embed)
     
@@ -258,7 +272,7 @@ async def stock(ctx,stock_name):
     
     await ctx.send(embed=embed1,view=view)
 
-@bot.command(name='chart', help='Enter the name of the company')
+@bot.command(name='chart-year', help='Enter the name of the company')
 async def stock_data(ctx, stock_company):
     stock = yf.Ticker(stock_company)
     data = stock.history(period="1y")
@@ -285,9 +299,9 @@ async def selection(ctx,*,companies):
     if(check_company(stock)):
         user_id=str(ctx.author.id)
         add_company(author,stock,user_id)
-        await ctx.send("💥 Added successfully 💥 !!")
+        await ctx.send("Added successfully 💥 !!")
     else:
-        await ctx.send("⛔ Wrong input ⛔")
+        await ctx.send("Wrong input ⛔")
 
 
 @bot.command(name='delete')
@@ -300,7 +314,7 @@ async def selection(ctx,*,companies):
         stock.append(b)
     if(check_company(stock)):
         delete_company(author,stock)
-    await ctx.send("✂ Deleted successfully ✂ !!") 
+    await ctx.send("Deleted successfully ✂ !!") 
 
 
 @bot.command(name='check')
@@ -318,7 +332,7 @@ async def selection(ctx):
         else:
             temp="**{}**  🔴\n".format(i)
         list+=temp
-    embed=discord.Embed(title="{}'s companies".format(ctx.author.display_name),description = list, color=0xFF5733)
+    embed=discord.Embed(title="{}'s companies".format(ctx.author.display_name),description = list, color=0xC733FF)
     await ctx.send(embed=embed)
 
 @bot.command(name='tanmay')
@@ -341,7 +355,7 @@ async def tanmay(ctx):
     await user.send("Hello there!")
 
 
-@bot.command(name='menu')
+@bot.command(name='chart')
 async def tanmay(ctx,company):
     company = company +".NS"
     select = Select(placeholder="Choose time period", options=[
@@ -367,7 +381,21 @@ async def tanmay(ctx,company):
     view.add_item(select)
     await ctx.send("Choose",view=view)
 
-    
+@bot.command(name='commands')
+async def tanmay(ctx):
+    embed=discord.Embed(title="Command list", description="use *@!* for command without space", color=0x67bb88)
+    embed.add_field(name="ac-channel [channel-mention]", value="announcement channel selection", inline=False)
+    embed.add_field(name="crypto [ticker]", value="cryptocurrency price", inline=False)
+    embed.add_field(name="get-list", value="top companies list with names and ticker", inline=False)
+    embed.add_field(name="dailystats", value="Top gainers and loser of a day", inline=False)
+    embed.add_field(name="stock [ticker]", value="company stats, news, about", inline=False)
+    embed.add_field(name="chart [ticker]", value="candlestick chart with dropdown for timeperiod", inline=False)
+    embed.add_field(name="select", value="user selection of his/her company", inline=False)
+    embed.add_field(name="delete", value="deletion of user company", inline=False)
+    embed.add_field(name="ipo", value="list of upcoming ipos", inline=False)
+    view = View()
+    await ctx.send(embed=embed, view=view)
+
 @bot.command(name='ipo')
 async def tanmay(ctx):
     list=""
