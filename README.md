@@ -26,7 +26,8 @@ Interactive discord bot where users can interact with the bot to view company st
 - `@!chart [ticker]` : candlestick chart with dropdown for timeperiod
 - `@!select [tickers]` : user selection of his/her company
 - `@!delete [tickers]` : deletion of user company
-- `@!ipo` : list of upcoming ipos
+- `@!ipo` : list of upcoming ipos with RSVP links
+- `@!commands` : list of all commands
  
 
 
