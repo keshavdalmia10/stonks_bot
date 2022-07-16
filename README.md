@@ -7,10 +7,13 @@ Interactive discord bot where users can interact with the bot to view company st
 
 ## Technology used
 
-- yFinance
-- BeautifulSoup
+- Discord API
+- yFinance API
 - MySQL
-- Binance
+- Binance API
+- Web Scraping using Beautiful Soup
+
+
 
 ## Sites scraped
 - www.zerodha.com
